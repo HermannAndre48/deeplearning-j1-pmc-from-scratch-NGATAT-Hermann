@@ -9,27 +9,42 @@ X = np.array([
 y = np.array([0, 1, 1, 0])
 
 
-# TODO : implémenter sigmoid(x)
-# formule : 1 / (1 + exp(-x))
-# numpy : np.exp(-x)
 def sigmoid(x):
-    pass
+    return 1 / (1 + np.exp(-x))
 
 
-# TODO : implémenter forward(X, w, b)
-# étape 1 : somme pondérée z = X @ w + b (numpy : np.dot)
-# étape 2 : retourner sigmoid(z)
 def forward(X, w, b):
-    pass
+    z = np.dot(X, w) + b
+    return sigmoid(z)
 
 
-# TODO : implémenter compute_loss(y_true, y_pred) — Binary Cross-Entropy
-# formule : -mean( y*log(ŷ) + (1-y)*log(1-ŷ) )
-# clamper y_pred entre 1e-7 et 1-1e-7 avant le log → np.clip
 def compute_loss(y_true, y_pred):
-    pass
+    y_pred = np.clip(y_pred, 1e-7, 1 - 1e-7)
+    return -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
 
-# Poids fixés — pas encore d'entraînement dans cette phase
 w = np.array([0.5, -0.3])
 b = 0.1
-# TODO : appeler forward, puis compute_loss, puis afficher y_pred.round(3) et loss
+
+# Test scénario normal
+y_pred = forward(X, w, b)
+loss = compute_loss(y, y_pred)
+print("Prédictions :", np.round(y_pred, 3))
+print("Étiquettes :", y)
+print("Loss BCE :", f"{loss:.4f}")
+print()
+
+# Test avec entrées à 0
+X_zeros = np.zeros((4, 2))
+y_pred_zeros = forward(X_zeros, w, b)
+loss_zeros = compute_loss(y, y_pred_zeros)
+print("Prédictions (X=0) :", np.round(y_pred_zeros, 3))
+print("Loss (X=0) :", f"{loss_zeros:.4f}")
+print()
+
+# Test avec poids à 0
+w_zero = np.zeros(2)
+b_zero = 0
+y_pred_adv = forward(X, w_zero, b_zero)
+loss_adv = compute_loss(y, y_pred_adv)
+print("Prédictions (w=0, b=0) :", np.round(y_pred_adv, 3))
+print("Loss (w=0, b=0) :", f"{loss_adv:.4f}")
