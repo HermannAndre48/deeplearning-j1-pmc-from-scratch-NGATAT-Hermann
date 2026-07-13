@@ -14,11 +14,6 @@ X_test = X_test.reshape(-1, 784).astype('float32') / 255.0
 print(f"Train : {X_train.shape} | Test : {X_test.shape}")
 print(f"Classes uniques : {np.unique(y_train)}\n")
 
-# ============ SCÉNARIO NORMAL : epochs=5, batch_size=64 ============
-print("="*60)
-print("SCÉNARIO NORMAL : epochs=5, batch_size=64")
-print("="*60)
-
 model = keras.Sequential([
     keras.layers.Dense(128, activation='relu', input_shape=(784,)),
     keras.layers.Dense(64, activation='relu'),
@@ -30,6 +25,13 @@ model.compile(
     loss='sparse_categorical_crossentropy',
     metrics=['accuracy']
 )
+
+print("Architecture du modèle :")
+model.summary()
+
+print("\n" + "="*60)
+print("SCÉNARIO NORMAL : epochs=5, batch_size=64")
+print("="*60)
 
 start = time.time()
 history = model.fit(
@@ -87,12 +89,10 @@ try:
         verbose=1
     )
     print(f"Historique : {history_zero.history}")
-except ValueError as e:
-    print(f"Erreur levée (ValueError) : {e}")
 except Exception as e:
-    print(f"Erreur levée ({type(e).__name__}) : {e}")
+    print(f"Erreur levée : {type(e).__name__}: {e}")
 
-# ============ SCÉNARIO ADVERSARIAL : batch_size=1 (SGD pur) ============
+# ============ SCÉNARIO ADVERSARIAL : batch_size=1 ============
 print("\n" + "="*60)
 print("SCÉNARIO ADVERSARIAL : batch_size=1 (SGD pur)")
 print("="*60)
@@ -109,7 +109,7 @@ model3.compile(
     metrics=['accuracy']
 )
 
-print("Entraînement avec batch_size=1 (peut être très lent)...")
+print("Entraînement avec batch_size=1 (peut être lent)...")
 start = time.time()
 history_bs1 = model3.fit(
     X_train, y_train,
@@ -124,16 +124,14 @@ test_loss_bs1, test_acc_bs1 = model3.evaluate(X_test, y_test, verbose=0)
 
 print(f"Temps d'entraînement (batch_size=1) : {elapsed_bs1:.1f}s")
 print(f"Temps d'entraînement (batch_size=64) : {elapsed:.1f}s")
-speedup = elapsed_bs1 / elapsed
-print(f"Ratio (speedup) : {speedup:.1f}x plus lent avec batch_size=1 !")
+print(f"Ratio (speedup) : {elapsed_bs1 / elapsed:.1f}x plus lent !")
 print(f"Test accuracy (batch_size=1) : {test_acc_bs1:.4f}")
 print(f"Test accuracy (batch_size=64) : {test_acc:.4f}")
-print(f"Instabilité : courbe de loss batch_size=1 est très irrégulière (pics fréquents)")
 
 fig, axes = plt.subplots(1, 2, figsize=(12, 4))
 axes[0].plot(history.history['loss'], label='batch_size=64', linewidth=2)
 axes[0].plot(history_bs1.history['loss'], label='batch_size=1 (SGD pur)', alpha=0.7)
-axes[0].set_title("Loss : stabilité batch_size=64 vs instabilité SGD pur")
+axes[0].set_title("Loss : stabilité de batch_size=64 vs instabilité SGD pur")
 axes[0].set_xlabel("Epoch")
 axes[0].legend()
 axes[1].plot(history.history['val_accuracy'], label='batch_size=64', linewidth=2)
@@ -217,4 +215,4 @@ for r in results:
     print(f"{r['Architecture']:<35} {r['Params']:>10,} {r['Val Accuracy']:>10.4f} {r['Test Accuracy']:>10.4f} {r['Time']:>8.1f}s")
 
 best = max(results, key=lambda x: x['Test Accuracy'])
-print(f"\n✓ Meilleure : {best['Architecture']} avec {best['Test Accuracy']:.4f} d'accuracy")
+print(f"\nMeilleure : {best['Architecture']} avec {best['Test Accuracy']:.4f} d'accuracy")
